@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마음은 있는데 말이 잘 안 나올 때 | 따뜻한 효도대화 생성기</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Pretendard/Inter -->
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: #F8F9FA;
+            color: #212529;
+        }
+        /* Custom scrollbar for message boxes */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <header class="w-full bg-white border-b border-gray-100 py-4 px-6 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="resetApp()">
+                <div class="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 font-bold text-lg">💬</div>
+                <div>
+                    <h1 class="font-bold text-base text-gray-800 tracking-tight">효도대화 생성기</h1>
+                    <p class="text-xs text-gray-400">HUMAN FIRST MASTER</p>
+                </div>
+            </div>
+            <button onclick="openHistory()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 font-medium py-1.5 px-3 rounded-xl transition">보낸 기록</button>
+        </div>
+    </header>
+
+    <main class="w-full max-w-xl mx-auto px-4 py-6 flex-grow flex flex-col">
+        
+        <!-- INTRO HERO SECTION -->
+        <section id="hero-section" class="mb-6 text-center py-6 px-4 bg-gradient-to-b from-amber-50/60 to-transparent rounded-3xl">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight leading-snug">
+                마음은 있는데<br>말이 잘 안 나올 때
+            </h2>
+            <p class="mt-2 text-sm text-gray-500 font-normal">
+                거창한 말 말고 그냥 평소처럼. AI 티 안 나는 진짜 내 말투 문자.
+            </p>
+        </section>
+
+        <!-- STEP 1: SITUATION & RELATIONSHIP INPUT -->
+        <div id="input-card" class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 mb-6 transition-all">
+            <label class="block text-sm font-semibold text-gray-800 mb-2 flex items-center justify-between">
+                <span>1. 지금 내 마음이나 상황을 골라보세요</span>
+                <span class="text-xs text-amber-600 font-normal">색다른 감정별 맞춤</span>
+            </label>
+            
+            <!-- EMOTIONAL CATEGORY TABS -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4" id="emotion-tabs">
+                <button type="button" onclick="selectEmotion('awkward', this)" class="emotion-tab text-xs py-2 px-3 bg-amber-50 border border-amber-300 text-amber-800 font-medium rounded-xl transition text-center truncate">🥺 연락 뜸해서 민망함</button>
+                <button type="button" onclick="selectEmotion('debt', this)" class="emotion-tab text-xs py-2 px-3 bg-gray-50 border border-gray-200 text-gray-600 font-medium rounded-xl hover:bg-amber-50 transition text-center truncate">🎁 받기만 해서 미안함</button>
+                <button type="button" onclick="selectEmotion('tsundere', this)" class="emotion-tab text-xs py-2 px-3 bg-gray-50 border border-gray-200 text-gray-600 font-medium rounded-xl hover:bg-amber-50 transition text-center truncate">😎 무뚝뚝하지만 고마움</button>
+                <button type="button" onclick="selectEmotion('counselor', this)" class="emotion-tab text-xs py-2 px-3 bg-gray-50 border border-gray-200 text-gray-600 font-medium rounded-xl hover:bg-amber-50 transition text-center truncate">🩺 상담사 톤 (마음챙김)</button>
+                <button type="button" onclick="selectEmotion('random', this)" class="emotion-tab text-xs py-2 px-3 bg-gray-50 border border-gray-200 text-gray-600 font-medium rounded-xl hover:bg-amber-50 transition text-center truncate">💭 갑자기 생각남</button>
+                <button type="button" onclick="selectEmotion('custom', this)" class="emotion-tab text-xs py-2 px-3 bg-gray-50 border border-gray-200 text-gray-600 font-medium rounded-xl hover:bg-amber-50 transition text-center truncate">✍️ 직접 입력하기</button>
+            </div>
+
+            <textarea id="user-situation" rows="3" 
+                class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition resize-none"
+                placeholder="선택한 감정에 맞는 예시가 자동으로 채워집니다. 직접 수정해도 좋아요!"></textarea>
+
+            <div class="mt-4">
+                <p class="text-xs font-semibold text-gray-500 mb-2">💡 미세 감정 조절 (선택)</p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="style-buttons">
+                    <button type="button" onclick="selectStyle(this, '무뚝뚝한 편')" class="style-btn text-xs py-2 px-3 bg-gray-50 hover:bg-amber-50 border border-gray-200 rounded-xl text-gray-600 font-medium transition text-center truncate">무뚝뚝한 편</button>
+                    <button type="button" onclick="selectStyle(this, '장난기 섞기')" class="style-btn text-xs py-2 px-3 bg-gray-50 hover:bg-amber-50 border border-gray-200 rounded-xl text-gray-600 font-medium transition text-center truncate">장난기 섞기</button>
+                    <button type="button" onclick="selectStyle(this, '평소랑 비슷하게')" class="style-btn text-xs py-2 px-3 bg-amber-50 border border-amber-300 text-amber-800 font-medium transition text-center truncate active-style">평소처럼 툭</button>
+                    <button type="button" onclick="selectStyle(this, '깊은 진심')" class="style-btn text-xs py-2 px-3 bg-gray-50 hover:bg-amber-50 border border-gray-200 rounded-xl text-amber-700 font-medium transition text-center truncate">마음 담아 진지하게</button>
+                </div>
+            </div>
+
+            <button onclick="generateMessages()" id="generate-btn" class="w-full mt-6 bg-gray-900 hover:bg-gray-800 text-white font-semibold py-3.5 px-6 rounded-2xl shadow-md transition flex items-center justify-center space-x-2 text-sm">
+                <span>내 감정에 딱 맞는 문자 만들기</span>
+                <span class="text-amber-400">✨</span>
+            </button>
+        </div>
+
+        <div id="loading-state" class="hidden flex-col items-center justify-center py-12">
+            <div class="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+            <p class="text-sm text-gray-500 font-medium">진짜 내가 쓴 것처럼 다듬는 중...</p>
+        </div>
+
+        <div id="results-section" class="hidden space-y-4 mb-8">
+            <div class="flex items-center justify-between px-1">
+                <h3 class="text-sm font-bold text-gray-700">이 정도면 오글거리지 않고 딱 좋아요</h3>
+                <button onclick="resetToInput()" class="text-xs text-amber-600 hover:underline font-medium">다시 만들기 ↺</button>
+            </div>
+
+            <!-- Result Card 1 -->
+            <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative group">
+                <div class="flex items-center justify-between mb-2">
+                    <span id="label-1" class="text-xs font-semibold px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg">1. 자연스럽고 가벼운 톤</span>
+                    <span class="text-xs text-gray-400">부담 제로</span>
+                </div>
+                <div id="result-box-1" class="bg-gray-50 rounded-2xl p-4 text-gray-800 text-sm whitespace-pre-line leading-relaxed font-normal mb-3"></div>
+                <div class="flex flex-wrap gap-2 pt-1 border-t border-gray-100 justify-between items-center">
+                    <div class="flex gap-1.5">
+                        <button onclick="tweakMessage(1, 'less_awkward')" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 py-1.5 px-3 rounded-xl transition">더 툭 던지듯</button>
+                        <button onclick="tweakMessage(1, 'shorter')" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 py-1.5 px-3 rounded-xl transition">진짜 짧게</button>
+                    </div>
+                    <button onclick="copyMessage(1)" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs py-2 px-4 rounded-xl shadow-sm transition flex items-center space-x-1">
+                        <span>이걸로 보내기</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Result Card 2 -->
+            <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 relative group">
+                <div class="flex items-center justify-between mb-2">
+                    <span id="label-2" class="text-xs font-semibold px-2.5 py-1 bg-orange-50 text-orange-700 rounded-lg">2. 따뜻한 마음 한 스푼</span>
+                    <span class="text-xs text-gray-400">여운 있는 톤</span>
+                </div>
+                <div id="result-box-2" class="bg-gray-50 rounded-2xl p-4 text-gray-800 text-sm whitespace-pre-line leading-relaxed font-normal mb-3"></div>
+                <div class="flex flex-wrap gap-2 pt-1 border-t border-gray-100 justify-between items-center">
+                    <div class="flex gap-1.5">
+                        <button onclick="tweakMessage(2, 'add_laugh')" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 py-1.5 px-3 rounded-xl transition">웃음 더하기</button>
+                        <button onclick="tweakMessage(2, 'shorter')" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 py-1.5 px-3 rounded-xl transition">진짜 짧게</button>
+                    </div>
+                    <button onclick="copyMessage(2)" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs py-2 px-4 rounded-xl shadow-sm transition flex items-center space-x-1">
+                        <span>이걸로 보내기</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 10+ CURATED "이 정도면 그냥 보내도 괜찮아" EXAMPLES GALLERY -->
+            <div class="bg-white rounded-3xl p-5 shadow-sm border border-gray-100 mt-6">
+                <h4 class="text-xs font-bold text-gray-700 mb-3 flex items-center justify-between">
+                    <span>📚 감정별 '이 정도면 그냥 보내도 괜찮아' 10선</span>
+                    <span class="text-[10px] text-amber-600 font-normal">클릭하면 바로 복사돼요</span>
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-64 overflow-y-auto pr-1">
+                    <div onclick="copyDirect('엄마 뭐해 ㅋㅋ\\n그냥 갑자기 생각나서 연락해봤어')" class="bg-gray-50 hover:bg-amber-50/50 border border-gray-100 p-3 rounded-2xl cursor-pointer transition text-xs text-gray-800 whitespace-pre-line">1. (연락 뜸함) 엄마 뭐해 ㅋㅋ<br>그냥 갑자기 생각나서 연락해봤어</div>
+                    <div onclick="copyDirect('엄마 반찬 너무 잘 먹고 있어 ㅋㅋ\\n맨날 받기만 해서 미안하네 고마워!')" class="bg-gray-50 hover:bg-amber-50/50 border border-gray-100 p-3 rounded-2xl cursor-pointer transition text-xs text-gray-800 whitespace-pre-line">2. (받기만 함) 엄마 반찬 너무 잘 먹고 있어<br>맨날 받기만 해서 미안하네 고마워!</div>
+                    <div onclick="copyDirect('아빠 몸은 좀 어때?\\n환절기라 기침 나면 안 되는데 조심해')" class="bg-gray-50 hover:bg-amber-50/50 border border-gray-100 p-3 rounded-2xl cursor-pointer transition text-xs text-gray-800 whitespace-pre-line">3. (걱정 슬쩍) 아빠 몸은 좀 어때?<br>환절기라 기침 나면 안 되는데 조심해</div>
+                    <div onclick="copyDirect('엄마 통장 확인해봐 ㅋㅋ\\n별거 아니지만 맛있는 거 사 먹어!')" class="bg-gray-50 hover:bg-amber-50/50 border border-gray-100 p-3 rounded-2xl cursor-pointer transition text-xs text-gray-800 whitespace-pre-line">4. (용돈 투척) 엄마 통장 확인해봐 ㅋㅋ<br>별거 아니지만 맛있는 거 사 먹어!</div>
+                    <div onclick="copyDirect('엄마한테 이런 말 좀 그렇지만\\n평소에 고마운 거 많다 ㅋㅋ 잘 지내지?')" class="bg-gray-50 hover:bg-amber-50/50 border border-gray-100 p-3 rounded-2xl cursor-pointer transition text-xs text-gray-800 whitespace-pre-line">5. (무심한 고마움) 엄마한테 이런 말 좀 그렇지만<br>평소에 고마운 거 많다 ㅋㅋ 잘 지내지?</div>
+                    <div onclick="copyDirect('요즘 정신없어서 연락이 너무 뜸했네 ㅠㅠ\\n엄마 잘 지내지? 이따 전화할게!')" class="bg-gray-50 hover:bg-amber-50/50 border border-gray-100 p-3 rounded-2xl cursor-pointer transition text-xs text-gray-800 whitespace-pre-line">6. (죄책감 덜기) 요즘 정신없어서 연락이 좀 뜸했네<br>엄마 잘 지내지? 이따 전화할게!</div>
+                    <div onclick="copyDirect('엄마 이번 주말에 집에 갈까 하는데\\n밥 해줄 수 있어? ㅋㅋ')" class="bg-gray-50 hover:bg-amber-50/50 border border-gray-100 p-3 rounded-2xl cursor-pointer transition text-xs text-gray-800 whitespace-pre-line">7. (방문 예고) 엄마 이번 주말에 집에 갈까 하는데<br>밥 해줄 수 있어? ㅋㅋ</div>
+                    <div onclick="copyDirect('오늘 날씨 엄청 춥더라\\n옷 따뜻하게 입고 나가지? 조심해!')" class="bg-gray-50 hover:bg-amber-50/50 border border-gray-100 p-3 rounded-2xl cursor-pointer transition text-xs text-gray-800 whitespace-pre-line">8. (날씨 핑계) 오늘 날씨 엄청 춥더라<br>옷 따뜻하게 입고 나가지? 조심해!</div>
+                    <div onclick="copyDirect('엄마 마음 복잡할 때 그냥 하늘 한번 봐\\n나도 잘 지내고 있으니까 걱정 말고!')" class="bg-gray-50 hover:bg-amber-50/50 border border-gray-100 p-3 rounded-2xl cursor-pointer transition text-xs text-gray-800 whitespace-pre-line">9. (상담사 톤) 엄마 마음 복잡할 때 그냥 하늘 봐<br>나도 잘 지내고 있으니까 걱정 말고!</div>
+                    <div onclick="copyDirect('생각해보니까 엄마가 해준 그 말\\n요즘 참 위로가 되더라 고마워 엄마')" class="bg-gray-50 hover:bg-amber-50/50 border border-gray-100 p-3 rounded-2xl cursor-pointer transition text-xs text-gray-800 whitespace-pre-line">10. (깊은 공감) 생각해보니까 엄마가 해준 그 말<br>요즘 참 위로가 되더라 고마워 엄마</div>
+                </div>
+            </div>
+
+            <!-- PARENT REPLY SIMULATOR -->
+            <div class="bg-amber-50/50 border border-amber-200/60 rounded-3xl p-5 mt-6">
+                <h4 class="text-xs font-bold text-amber-800 mb-2 flex items-center space-x-1">
+                    <span>💬 부모님이 답장하셨나요? 이어가기 추천</span>
+                </h4>
+                <div class="flex space-x-2 mb-3">
+                    <input type="text" id="parent-reply-input" placeholder="예: 그래 밥은 먹었냐 / 뭐 필요한 거 있나" class="flex-grow p-3 bg-white border border-amber-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <button onclick="generateReplyContinue()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-4 rounded-xl transition">답장 추천</button>
+                </div>
+                <div id="reply-suggestion-box" class="hidden bg-white p-3 rounded-2xl text-xs text-gray-700 border border-amber-100">
+                    <!-- Dynamic reply suggestion -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TOAST NOTIFICATION -->
+        <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs font-medium py-3 px-6 rounded-2xl shadow-xl transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center space-x-2">
+            <span>✨</span>
+            <span id="toast-msg">복사되었습니다! 카카오톡에 붙여넣어 보세요.</span>
+        </div>
+
+    </main>
+
+    <footer class="w-full py-6 text-center text-xs text-gray-400 border-t border-gray-100 bg-white">
+        <p>인간적인 감성과 일상 속 온도를 지향합니다. © HUMAN FIRST MASTER</p>
+    </footer>
+
+    <!-- HISTORY MODAL -->
+    <div id="history-modal" class="fixed inset-0 bg-black/40 backdrop-blur-xs hidden items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
+                <h3 class="font-bold text-gray-800 text-sm">내가 보냈던 따뜻한 말록</h3>
+                <button onclick="closeHistory()" class="text-gray-400 hover:text-gray-600 text-sm font-bold p-1">✕</button>
+            </div>
+            <div id="history-list" class="flex-grow overflow-y-auto space-y-3 pr-1">
+                <!-- History items populated here -->
+            </div>
+            <button onclick="clearHistory()" class="mt-4 w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-medium rounded-xl transition">기록 전체 삭제</button>
+        </div>
+    </div>
+
+    <script>
+        let currentEmotionType = 'awkward';
+        let selectedStyleOption = '평소랑 비슷하게';
+        let currentGeneratedMessages = ['', ''];
+
+        // Initial preset load
+        window.onload = function() {
+            selectEmotion('awkward', document.querySelector('.emotion-tab'));
+        };
+
+        function selectEmotion(type, btn) {
+            currentEmotionType = type;
+            document.querySelectorAll('.emotion-tab').forEach(b => {
+                b.classList.remove('bg-amber-50', 'border-amber-300', 'text-amber-800');
+                b.classList.add('bg-gray-50', 'border-gray-200', 'text-gray-600');
+            });
+            if(btn) {
+                btn.classList.remove('bg-gray-50', 'border-gray-200', 'text-gray-600');
+                btn.classList.add('bg-amber-50', 'border-amber-300', 'text-amber-800');
+            }
+
+            const textarea = document.getElementById('user-situation');
+            switch(type) {
+                case 'awkward':
+                    textarea.value = "연락이 너무 뜸해서 어색한데 뭐라도 보내고 싶을 때";
+                    break;
+                case 'debt':
+                    textarea.value = "부모님이 김치나 용돈, 반찬 보내주셨는데 받기만 해서 민망할 때";
+                    break;
+                case 'tsundere':
+                    textarea.value = "고맙긴 한데 직접 말하기는 오글거려서 툭 던지듯 표현하고 싶을 때";
+                    break;
+                case 'counselor':
+                    textarea.value = "마음이 복잡하고 지쳤을 때, 따뜻한 위로와 심리적 안정을 주고받고 싶을 때";
+                    break;
+                case 'random':
+                    textarea.value = "별일 없는데 그냥 갑자기 부모님 생각이 나서 톡 할 때";
+                    break;
+                case 'custom':
+                    textarea.value = "";
+                    textarea.placeholder = "예: 아빠가 차 고쳐줬는데 쑥스러워서 제대로 인사를 못 함";
+                    break;
+            }
+        }
+
+        function selectStyle(btn, styleName) {
+            document.querySelectorAll('.style-btn').forEach(b => {
+                b.classList.remove('bg-amber-50', 'border-amber-300', 'text-amber-800', 'active-style');
+                b.classList.add('bg-gray-50', 'border-gray-200', 'text-gray-600');
+            });
+            btn.classList.remove('bg-gray-50', 'border-gray-200', 'text-gray-600');
+            btn.classList.add('bg-amber-50', 'border-amber-300', 'text-amber-800', 'active-style');
+            selectedStyleOption = styleName;
+        }
+
+        function generateMessages() {
+            const situation = document.getElementById('user-situation').value.trim();
+            
+            document.getElementById('input-card').classList.add('hidden');
+            document.getElementById('hero-section').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('loading-state').classList.add('flex');
+
+            setTimeout(() => {
+                const result = craftNuancedMessages(currentEmotionType, situation, selectedStyleOption);
+                currentGeneratedMessages = result;
+
+                document.getElementById('result-box-1').innerText = result[0];
+                document.getElementById('result-box-2').innerText = result[1];
+
+                document.getElementById('loading-state').classList.remove('flex');
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('results-section').classList.remove('hidden');
+            }, 600);
+        }
+
+        function craftNuancedMessages(emotion, sit, style) {
+            let msg1 = "";
+            let msg2 = "";
+
+            if (emotion === 'awkward' || sit.includes('뜸해서')) {
+                msg1 = "엄마 잘 지내지?\n내가 요즘 정신없어서 연락이 좀 뜸했네 ㅋㅋ";
+                msg2 = "엄마 뭐해? 갑자기 생각나서 연락해봤어.\n이번 주말에 별일 없지?";
+            } else if (emotion === 'debt' || sit.includes('받기만')) {
+                msg1 = "엄마 반찬 잘 받았어 ㅋㅋ\n이번에도 한동안 걱정 없겠다 고마워!";
+                msg2 = "맨날 받기만 하네 미안하게 ㅋㅋ\n반찬 진짜 맛있더라 잘 먹을게!";
+            } else if (emotion === 'tsundere' || sit.includes('오글거려')) {
+                msg1 = "엄마한테 이런 말 좀 그렇지만\n평소에 고마운 거 많다 ㅋㅋ 잘 지내지?";
+                msg2 = "생각해보니까 엄마가 해준 거 은근 많네\n표현은 안 해도 다 알고 있음 ㅋㅋ";
+            } else if (emotion === 'counselor' || sit.includes('마음이 복잡')) {
+                msg1 = "엄마 요즘 마음은 어때? 잘 지내지?\n그냥 목소리 듣고 싶어서 연락해봤어.";
+                msg2 = "오늘 문득 엄마가 해줬던 말이 떠오르더라.\n늘 고마워 엄마, 오늘 저녁 맛있는 거 먹어.";
+            } else if (emotion === 'random' || sit.includes('생각이 나서')) {
+                msg1 = "엄마 뭐해 ㅋㅋ\n그냥 오늘 갑자기 생각나서 연락해봤어";
+                msg2 = "엄마 잘 지내지? 갑자기 엄마 생각나더라고 ㅎㅎ\n이따 통화나 하자";
+            } else {
+                if (style === '무뚝뚝한 편') {
+                    msg1 = `엄마 ${sit} 잘 되지?\n별일 없지?`;
+                    msg2 = `엄마 뭐해?\n이번 주에 집에 갈까 하는데`;
+                } else {
+                    msg1 = `엄마 ${sit} 일도 있고 해서 연락해봤어 ㅋㅋ 잘 지내지?`;
+                    msg2 = `엄마 요즘 어떻게 지내?\n${sit} 생각나서 톡해봤어 ㅎㅎ 조만간 보자!`;
+                }
+            }
+
+            if (style === '장난기 섞기') {
+                msg1 += " 밥 안 먹었으면 굶지 말고 ㅋㅋ";
+                msg2 += " 용돈은 안 바란다 장난이야 ㅎㅎ";
+            } else if (style === '깊은 진심') {
+                msg1 = msg1.replace(" ㅋㅋ", "").replace(" ㅎㅎ", "");
+                msg2 = msg2.replace(" ㅋㅋ", "").replace(" ㅎㅎ", "");
+            }
+
+            return [msg1, msg2];
+        }
+
+        function tweakMessage(index, type) {
+            let currentText = currentGeneratedMessages[index - 1];
+            if (type === 'shorter') {
+                currentText = currentText.split('\n')[0] + ' ㅎㅎ';
+            } else if (type === 'less_awkward') {
+                currentText = currentText.replace(/사랑|고마워|미안해/g, '').trim() + ' ㅋㅋ';
+                if (!currentText.includes('ㅋㅋ')) currentText += ' ㅋㅋ';
+            } else if (type === 'add_laugh') {
+                if (!currentText.includes('ㅋㅋ') && !currentText.includes('ㅎㅎ')) {
+                    currentText += ' ㅋㅋ';
+                }
+            }
+            currentGeneratedMessages[index - 1] = currentText;
+            document.getElementById(`result-box-${index}`).innerText = currentText;
+            showToast('말투를 조금 수정했어요!');
+        }
+
+        function copyMessage(index) {
+            const textToCopy = currentGeneratedMessages[index - 1];
+            
+            const textarea = document.createElement('textarea');
+            textarea.value = textToCopy;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('복사 완료! 카카오톡에 바로 붙여넣어 보세요.');
+                saveToHistory(textToCopy);
+            } catch (err) {
+                showToast('복사에 실패했어요 다시 시도해 주세요.');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function generateReplyContinue() {
+            const replyInput = document.getElementById('parent-reply-input').value.trim();
+            const box = document.getElementById('reply-suggestion-box');
+            
+            if (!replyInput) {
+                box.innerHTML = '<span class="text-gray-400">부모님 답장을 간단히 적어주세요!</span>';
+                box.classList.remove('hidden');
+                return;
+            }
+
+            let suggestion = "나도 잘 지내지 뭐 ㅎㅎ 이따 통화할까?";
+            if (replyInput.includes('밥') || replyInput.includes('먹')) {
+                suggestion = "나도 방금 먹었지 ㅋㅋ 엄마는 뭐 먹었어?";
+            } else if (replyInput.includes('바쁘') || replyInput.includes('일')) {
+                suggestion = "응 나도 바쁘네 ㅋㅋ 주말에 조용할 때 연락할게!";
+            } else {
+                suggestion = "그래 ㅎㅎ 건강 잘 챙기고 있어 나중에 연락 또 할게!";
+            }
+
+            box.innerHTML = `
+                <div class="font-medium text-amber-900 mb-1">추천 이어가기:</div>
+                <div class="bg-gray-50 p-2.5 rounded-xl text-gray-800 font-normal">${suggestion}</div>
+                <button onclick="copyReplyText('${suggestion}')" class="mt-2 text-xs bg-amber-600 hover:bg-amber-700 text-white font-medium py-1 px-3 rounded-lg transition">이 답장 복사하기</button>
+            `;
+            box.classList.remove('hidden');
+        }
+
+        function copyReplyText(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('답장 문구가 복사되었습니다!');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+
+        function resetToInput() {
+            document.getElementById('results-section').classList.add('hidden');
+            document.getElementById('input-card').classList.remove('hidden');
+            document.getElementById('hero-section').classList.remove('hidden');
+            document.getElementById('reply-suggestion-box').classList.add('hidden');
+            document.getElementById('parent-reply-input').value = '';
+        }
+
+        function resetApp() {
+            resetToInput();
+            selectEmotion('awkward', document.querySelector('.emotion-tab'));
+        }
+
+        function saveToHistory(text) {
+            let history = JSON.parse(localStorage.getItem('human_first_history') || '[]');
+            history.unshift({ text, date: new Date().toLocaleDateString() });
+            if (history.length > 10) history.pop();
+            localStorage.setItem('human_first_history', JSON.stringify(history));
+        }
+
+        function openHistory() {
+            const modal = document.getElementById('history-modal');
+            const listContainer = document.getElementById('history-list');
+            let history = JSON.parse(localStorage.getItem('human_first_history') || '[]');
+
+            if (history.length === 0) {
+                listContainer.innerHTML = '<p class="text-xs text-gray-400 text-center py-6">아직 보낸 기록이 없어요.</p>';
+            } else {
+                listContainer.innerHTML = history.map(item => `
+                    <div class="bg-gray-50 p-3.5 rounded-2xl border border-gray-100 flex flex-col justify-between">
+                        <p class="text-xs text-gray-800 whitespace-pre-line mb-2">${item.text}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] text-gray-400">${item.date}</span>
+                            <button onclick="copyDirect('${item.text.replace(/'/g, "\\'")}')" class="text-[11px] bg-white hover:bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-lg font-medium transition">다시 복사</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function copyDirect(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('기록에서 복사되었습니다!');
+            closeHistory();
+        }
+
+        function closeHistory() {
+            const modal = document.getElementById('history-modal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        function clearHistory() {
+            localStorage.removeItem('human_first_history');
+            openHistory();
+            showToast('기록이 삭제되었습니다.');
+        }
+    </script>
+</body>
+</html>
